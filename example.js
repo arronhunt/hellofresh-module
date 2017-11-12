@@ -1,5 +1,9 @@
-const hf = require('./src/index.js');
+const { 
+    Ingredients,
+    Recipes,
+    Menus
+} = require('./src/');
 
-hf.Recipes.list(10).then(data => {
+Recipes.list().then(data => {
     console.log(data);
 });
