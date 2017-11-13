@@ -1,7 +1,4 @@
-const https = require('https');
-
-const HOST = 'gw.hellofresh.com'
-const BEARER = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MTMwNjM1OTAsImp0aSI6IjFhNjhkMjk1LTk5OGEtNGYxMy1hNzVlLTljYTU3N2FjMDY0YiIsImlhdCI6MTUxMDQzMzg0NywiaXNzIjoic2VuZiJ9.fB7kf4-p93lucuqfGX2BItuqQoYBxi_YwhN9jIyLi-4';
+const util = require('./util');
 
 /**
  * Request HelloFresh Recipes
@@ -13,7 +10,7 @@ class Recipes {
      * @param {string} id - Retrieves details for recipe item with ID
      */
     static getById(id) {
-        return query(`recipes/${id}`);
+        return util.query(`recipes/${id}`);
     }
 
     /**
@@ -21,7 +18,7 @@ class Recipes {
      * @param {number} [page] - Page through the results 
      */
     static list(skip = 0) {
-        return query('recipes', {skip});
+        return util.query('recipes', {skip});
     }
 
     /**
@@ -50,7 +47,7 @@ class Recipes {
      * @param {number} [limit=10] - Number of results to return
      */
     static search(criteria = {}, offset = 0, limit = 10) {
-        return query('recipes/search', {...criteria, offset, limit});
+        return util.query('recipes/search', {...criteria, offset, limit});
     }
 };
 
@@ -71,7 +68,7 @@ class Menus {
      * @param {string} id - Retrieves details for menu item with ID
      */
     static getById(id) {
-        return query(`menus/${id}`);
+        return util.query(`menus/${id}`);
     }
 
     /**
@@ -83,7 +80,7 @@ class Menus {
      * Menus.week(2017, 0);
      */
     static week(year, week) {
-        return query('menus', {week: `${year}-W${week}`});
+        return util.query('menus', {week: `${year}-W${week}`});
     }
 };
 
@@ -97,7 +94,7 @@ class Ingredients {
      * @param {number} [page] - Page through the results 
      */
     static list(skip = 0) {
-        return query('ingredients', {skip});
+        return util.query('ingredients', {skip});
     }
 
     /**
@@ -105,47 +102,8 @@ class Ingredients {
      * @param {string} id - Retrieves details for ingredient with ID
      */
     static getById(id) {
-        return query(`ingredients/${id}`);
+        return util.query(`ingredients/${id}`);
     }
-};
-
-const keysToURLParams = (keys) => {
-    let params_string = '';
-    Object.keys(keys).forEach((key, index) => {
-        params_string+=`${index ? '&' : '?'}${key}=${keys[key]}`;
-    });
-    return encodeURI(params_string);
-}
-
-const query = (route, query = {}) => {
-    const params = { ...query, country: 'us', locale: 'en-US' };
-    let urlParams = keysToURLParams(params);
-    const path = `/api/${route}${urlParams}`;
-    return httpGetAsync(path);
-};
-
-const httpGetAsync = async (path) => {
-    return new Promise((resolve, reject) => {
-        const request = https.request({
-                host: HOST,
-                path,
-                method: 'GET',
-                headers: {
-                    authorization: `Bearer ${BEARER}`
-                }
-            }, response => {
-            if (response.statusCode < 200 || response.statusCode > 299) {
-                reject(new Error('Failed to load page, status code: ' + response.statusCode));
-            };
-            let data = '';
-            response.on('data', chunk => {data += chunk});
-            response.on('end', () => {
-                resolve(JSON.parse(data));
-            });
-        });
-        request.on('error', (error) => reject(error));
-        request.end();
-    });
 };
 
 module.exports = {
