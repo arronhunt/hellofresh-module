@@ -109,13 +109,18 @@ class Ingredients {
     }
 };
 
-const query = (route, params = {}) => {
-    const url_params = { ...params, country: 'us', locale: 'en-US' };
+const keysToURLParams = (keys) => {
     let params_string = '';
-    Object.keys(url_params).forEach((key, index) => {
-        params_string+=`${index ? '&' : '?'}${key}=${url_params[key]}`;
+    Object.keys(keys).forEach((key, index) => {
+        params_string+=`${index ? '&' : '?'}${key}=${keys[key]}`;
     });
-    const path = `/api/${route}${params_string}`
+    return encodeURI(params_string);
+}
+
+const query = (route, query = {}) => {
+    const params = { ...query, country: 'us', locale: 'en-US' };
+    let urlParams = keysToURLParams(params);
+    const path = `/api/${route}${urlParams}`;
     return httpGetAsync(path);
 };
 
